@@ -1,4 +1,3 @@
-version: '3.8'
 
 # Run the full stack locally (app + monitoring)
 # Usage: docker compose up -d

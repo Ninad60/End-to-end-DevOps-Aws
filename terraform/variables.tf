@@ -11,7 +11,7 @@ variable "app_name" {
 }
 
 variable "instance_type" {
-  description = "EC2 size. t2.micro is free-tier eligible (1 vCPU / 1 GB)."
+  description = "EC2 size. t2.micro is free-tier eligible on newer accounts (1 vCPU / 1 GB)."
   type        = string
   default     = "t3.micro"
 }

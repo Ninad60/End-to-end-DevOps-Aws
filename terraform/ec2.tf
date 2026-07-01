@@ -129,7 +129,7 @@ resource "aws_instance" "app" {
     #!/bin/bash
     set -euxo pipefail
 
-    # swap so the 1 GB t2.micro can run app + prometheus + grafana
+    # swap so the 1 GB instance can run app + prometheus + grafana
     fallocate -l 2G /swapfile
     chmod 600 /swapfile
     mkswap /swapfile
@@ -137,14 +137,21 @@ resource "aws_instance" "app" {
     echo '/swapfile none swap sw 0 0' >> /etc/fstab
 
     dnf update -y
-    dnf install -y git unzip
+    dnf install -y git unzip docker
 
-    # Docker + compose plugin (official convenience script, distro-agnostic)
-    curl -fsSL https://get.docker.com | sh
+    # Docker engine (Amazon Linux 2023 ships docker in its own repo —
+    # the get.docker.com convenience script does NOT support 'amzn')
     systemctl enable --now docker
     usermod -aG docker ec2-user
 
-    # AWS CLI v2 (needed by deploy.sh to read the SSM secret)
+    # Compose v2 + buildx plugins (needed to build the app image)
+    PLUGINS=/usr/libexec/docker/cli-plugins
+    mkdir -p "$PLUGINS"
+    curl -SL "https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64" -o "$PLUGINS/docker-compose"
+    curl -SL "https://github.com/docker/buildx/releases/download/v0.19.3/buildx-v0.19.3.linux-amd64" -o "$PLUGINS/docker-buildx"
+    chmod +x "$PLUGINS/docker-compose" "$PLUGINS/docker-buildx"
+
+    # AWS CLI v2 (deploy.sh uses it to read the SSM secret)
     curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
     unzip -q /tmp/awscliv2.zip -d /tmp
     /tmp/aws/install
