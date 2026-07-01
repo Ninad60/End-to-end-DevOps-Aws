@@ -1,0 +1,15 @@
+# terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*.tfplan
+crash.log
+
+# secrets / env
+**/.env
+*.pem
+*.key
+
+# node
+app/node_modules/
+npm-debug.log*

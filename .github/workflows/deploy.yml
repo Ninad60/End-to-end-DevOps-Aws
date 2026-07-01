@@ -1,0 +1,49 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── JOB 1: run tests on every push and PR ──────────────────
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        working-directory: ./app
+        run: npm install
+      - name: Run unit tests
+        working-directory: ./app
+        run: node test.js
+      - name: Dependency audit (non-blocking)
+        working-directory: ./app
+        run: npm audit || true
+
+  # ── JOB 2: deploy over SSH — only on main, after a manual gate ──
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # This ties the job to the "production" GitHub Environment.
+    # Add yourself as a Required Reviewer there to get a manual approval gate.
+    environment: production
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            REPO="https://github.com/${{ github.repository }}.git"
+            if [ ! -d ~/app ]; then git clone "$REPO" ~/app; fi
+            cd ~/app
+            git pull
+            bash deploy.sh

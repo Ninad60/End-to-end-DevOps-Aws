@@ -1,0 +1,71 @@
+{
+  "title": "8Byte App - Application Metrics",
+  "uid": "8byte-app",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Total HTTP Requests",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "targets": [{
+        "expr": "http_requests_total",
+        "datasource": "Prometheus"
+      }]
+    },
+    {
+      "id": 2,
+      "title": "Total Errors",
+      "type": "stat",
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+      "targets": [{
+        "expr": "http_errors_total",
+        "datasource": "Prometheus"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "App Uptime (seconds)",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "targets": [{
+        "expr": "app_uptime_seconds",
+        "datasource": "Prometheus"
+      }]
+    },
+    {
+      "id": 4,
+      "title": "Active Todos",
+      "type": "stat",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "targets": [{
+        "expr": "todos_total",
+        "datasource": "Prometheus"
+      }]
+    },
+    {
+      "id": 5,
+      "title": "Request Rate (per minute)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 4, "w": 24, "h": 8 },
+      "targets": [{
+        "expr": "rate(http_requests_total[1m]) * 60",
+        "legendFormat": "requests/min",
+        "datasource": "Prometheus"
+      }]
+    }
+  ]
+}
